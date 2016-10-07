@@ -1,9 +1,24 @@
-from flask import Flask
 import os
 import sys
-import numpy as np
+import json
 
+import numpy as np
+from flask import Flask
+from flask import request
+
+from app.kalman import Kalman
+
+km = Kalman(54.47756757, 18.54963631)
 app = Flask(__name__)
+
+
+@app.route('/1', methods=['POST'])
+def kalman():
+    data = json.loads(request.data.decode("utf-8"))
+    lat = data["lat"]
+    lon = data["lon"]
+    km.count_current_state(float(lat), float(lon))
+    return str(km.x_tr)
 
 
 @app.route('/')
@@ -13,6 +28,7 @@ def root():
     Kalman API<br>
     Bachelor Thesis /all.<br>"""
     return python_version + r
+
 
 @app.route('/numpy')
 def test_numpy():
