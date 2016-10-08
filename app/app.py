@@ -18,7 +18,7 @@ def kalman():
     lat = data["lat"]
     lon = data["lon"]
     km.count_current_state(float(lat), float(lon))
-    return str(km.x_tr)
+    return "{} {} \n".format(str(km.x_tr[-1]), str(km.y_tr[-1]))
 
 
 @app.route('/')

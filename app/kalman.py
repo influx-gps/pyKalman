@@ -77,5 +77,4 @@ class Kalman(object):
 #     y = np.squeeze(np.asarray(y))
 #     a = kalman.x_tr
 #     b = kalman.y_tr
-#     plt.plot(a,b,x,y)
-#     plt.show()
+
