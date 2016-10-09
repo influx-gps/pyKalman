@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 import json
 
 import requests
@@ -24,15 +23,6 @@ FILTER_DATA_TEMP = "filter.txt"
 DEFAULT_HOST = 'http://localhost:9099/kalman/1'
 
 
-def read_data(*, filename):
-    with open(filename, 'r') as data:
-        for line in data:
-            line = line.split(' ')
-            x_value, y_value = line[0], line[1]
-            y_value = y_value.replace('\n', '')
-            yield float(x_value), float(y_value)
-
-
 def send_data(*, datafile, host=DEFAULT_HOST):
     data = init_transmission(datafile=datafile)
     for each in data:
@@ -50,6 +40,15 @@ def init_transmission(*, datafile):
     with open(FILTER_DATA_TEMP, "a+") as file:
         file.write(r.text)
     return data
+
+
+def read_data(*, filename):
+    with open(filename, 'r') as data:
+        for line in data:
+            line = line.split(' ')
+            x_value, y_value = line[0], line[1]
+            y_value = y_value.replace('\n', '')
+            yield float(x_value), float(y_value)
 
 
 def clean():

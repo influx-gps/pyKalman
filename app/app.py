@@ -1,48 +1,22 @@
 import os
 import sys
 import json
-from collections import namedtuple
 
 import numpy as np
 from flask import Flask, request
 
-from kalman import Kalman
+from scoring_engine import ScoringEngine
 
-CACHE_STATE = {}
-Record = namedtuple('Record', 'lat lon P state')
+
+SE = ScoringEngine()
 app = Flask(__name__)
-
-
-def init_params(*, id, lat, lon):
-    init_state = np.matrix([lat, lon, 0, 0])
-    state = init_state.T
-    P = 5 * np.eye(4)
-    CACHE_STATE[id] = Record(lat, lon, P, state)
-    return P, state
-
-
-def get_last_params(*, id):
-    last_record = CACHE_STATE.get(id)
-    return last_record.P, last_record.state
 
 
 @app.route('/kalman/<track_id>', methods=['POST'])
 def kalman(track_id):
     data = json.loads(request.data.decode("utf-8"))
-    lat = data["lat"]
-    lon = data["lon"]
-    position = data["position"]
-
-    p_m, state = init_params(id=track_id, lat=lat, lon=lon) \
-        if position == "START" \
-        else get_last_params(id=track_id)
-
-    km = Kalman(lat=lat, lon=lon, p=p_m, state=state)
-    p_m, state = km.count_current_state(lat=float(lat), lon=float(lon))
-
-    CACHE_STATE[track_id] = Record(lat, lon, p_m, state)
-
-    return "{} {} \n".format(str(km.x_tr[-1]), str(km.y_tr[-1]))
+    corrected_lat, corrected_lon = SE.calculate(data=data, id=track_id)
+    return "{} {} \n".format(corrected_lat, corrected_lon)
 
 
 @app.route('/')
