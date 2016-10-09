@@ -1,5 +1,5 @@
 applications:
-- name: kalman_app
+- name: pyKalman
   memory: 1GB
   disk_quota: 2GB
-  command: python app.py
+  command: python app/app.py

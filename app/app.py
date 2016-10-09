@@ -3,10 +3,9 @@ import sys
 import json
 
 import numpy as np
-from flask import Flask
-from flask import request
+from flask import Flask, request
 
-from app.kalman import Kalman
+from kalman import Kalman
 
 km = Kalman(54.47756757, 18.54963631)
 app = Flask(__name__)
@@ -33,7 +32,10 @@ def root():
 @app.route('/numpy')
 def test_numpy():
     z = np.array([1729])
-    return "Numpy array: {}".format(int(z))
+    return """"<br><br>
+    Numpy Test<br>
+    This endpoint checks if env has installed numpy.<br>
+    Test value = {}""".format(int(z))
 
 if __name__ == '__main__':
     # Get port from environment variable or choose 9099 as local default
