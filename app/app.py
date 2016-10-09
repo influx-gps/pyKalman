@@ -1,14 +1,29 @@
 import os
 import sys
 import json
+from collections import namedtuple
 
 import numpy as np
 from flask import Flask, request
 
 from kalman import Kalman
 
-km = Kalman(lat=54.47756757, lon=18.54963631)
+CACHE_STATE = {}
+Record = namedtuple('Record', 'lat lon P state')
 app = Flask(__name__)
+
+
+def init_params(*, id, lat, lon):
+    init_state = np.matrix([lat, lon, 0, 0])
+    state = init_state.T
+    P = 5 * np.eye(4)
+    CACHE_STATE[id] = Record(lat, lon, P, state)
+    return P, state
+
+
+def get_last_params(*, id):
+    last_record = CACHE_STATE.get(id)
+    return last_record.P, last_record.state
 
 
 @app.route('/kalman/<track_id>', methods=['POST'])
@@ -16,16 +31,17 @@ def kalman(track_id):
     data = json.loads(request.data.decode("utf-8"))
     lat = data["lat"]
     lon = data["lon"]
-    km.count_current_state(lat=float(lat), lon=float(lon))
-    return "{} {} \n".format(str(km.x_tr[-1]), str(km.y_tr[-1]))
+    position = data["position"]
 
+    p_m, state = init_params(id=track_id, lat=lat, lon=lon) \
+        if position == "START" \
+        else get_last_params(id=track_id)
 
-@app.route('/1', methods=['POST'])
-def static_kalman():
-    data = json.loads(request.data.decode("utf-8"))
-    lat = data["lat"]
-    lon = data["lon"]
-    km.count_current_state(lat=float(lat), lon=float(lon))
+    km = Kalman(lat=lat, lon=lon, p=p_m, state=state)
+    p_m, state = km.count_current_state(lat=float(lat), lon=float(lon))
+
+    CACHE_STATE[track_id] = Record(lat, lon, p_m, state)
+
     return "{} {} \n".format(str(km.x_tr[-1]), str(km.y_tr[-1]))
 
 

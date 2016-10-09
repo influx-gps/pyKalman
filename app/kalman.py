@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Kalman(object):
-    def __init__(self, *, lat, lon, id=None):
+    def __init__(self, *, lat, lon, p=None, state=None):
         self.id = id
         self.lat = lat
         self.lon = lon
@@ -28,11 +28,11 @@ class Kalman(object):
                             [1, 0],
                             [0, 1]])
 
-        self.P = 5 * np.eye(4)
+        self.P = p
         self.I = np.eye(4)
 
-        self.init_state = np.matrix([lat, lon, 0, 0])
-        self.state = self.init_state.T
+        # self.init_state = np.matrix([lat, lon, 0, 0])
+        self.state = state
 
         self.x_tr = np.array([])
         self.y_tr = np.array([])
@@ -54,4 +54,6 @@ class Kalman(object):
         yy = place.item(1)
         self.x_tr = np.append(self.x_tr, xx)
         self.y_tr = np.append(self.y_tr, yy)
+
+        return self.P, self.state
 
