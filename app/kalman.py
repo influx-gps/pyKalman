@@ -2,41 +2,42 @@ import numpy as np
 
 
 class Kalman(object):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+    def __init__(self, *, lat, lon, id=None):
+        self.id = id
+        self.lat = lat
+        self.lon = lon
 
         self.T = 1  # time
 
         self.Q = np.matrix([[0.25, 0],
-                           [0, 0.25]])
+                            [0, 0.25]])
 
         self.R = np.matrix([[2.0, 0],
-                           [0, 2.0]])
+                            [0, 2.0]])
 
         self.H = np.matrix([[1, 0, 0, 0],
-                           [0, 1, 0, 0]])
+                            [0, 1, 0, 0]])
 
         self.F = np.matrix([[1, 0, self.T, 0],
-                           [0, 1, 0, self.T],
-                           [0, 0, 1, 0],
-                           [0, 0, 0, 1]])
+                            [0, 1, 0, self.T],
+                            [0, 0, 1, 0],
+                            [0, 0, 0, 1]])
 
         self.G = np.matrix([[0, 0],
-                           [0, 0],
-                           [1, 0],
-                           [0, 1]])
+                            [0, 0],
+                            [1, 0],
+                            [0, 1]])
 
         self.P = 5 * np.eye(4)
         self.I = np.eye(4)
 
-        self.init_state = np.matrix([x, y, 0, 0])
+        self.init_state = np.matrix([lat, lon, 0, 0])
         self.state = self.init_state.T
 
         self.x_tr = np.array([])
         self.y_tr = np.array([])
 
-    def count_current_state(self, lat, lon):
+    def count_current_state(self, *, lat, lon, P=None, state=None):
         new_state = self.F * self.state
         self.P = self.F * self.P * self.F.T + \
                  self.G * self.Q * self.G.T
@@ -53,28 +54,4 @@ class Kalman(object):
         yy = place.item(1)
         self.x_tr = np.append(self.x_tr, xx)
         self.y_tr = np.append(self.y_tr, yy)
-
-#
-# def read_data(file_name):
-#     with open(file_name, 'r') as data:
-#         x, y = [], []
-#         for line in data:
-#             line = line.split(' ')
-#             x_value = line[0]
-#             y_value = line[1]
-#             y_value = y_value.replace('\n', '')
-#             x.append(float(x_value))
-#             y.append(float(y_value))
-#     return np.matrix(x), np.matrix(y)
-#
-#
-# if __name__ == "__main__":
-#     x, y = read_data("data.txt")
-#     kalman = Kalman(x, y)
-#     for i in range(500):
-#         kalman.count_current_state(i)
-#     x = np.squeeze(np.asarray(x))
-#     y = np.squeeze(np.asarray(y))
-#     a = kalman.x_tr
-#     b = kalman.y_tr
 

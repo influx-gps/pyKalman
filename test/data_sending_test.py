@@ -21,7 +21,7 @@ logging.basicConfig(format='[%(asctime)s] %(levelname)s::%(module)s::%(funcName)
 
 DATA_FILE = "data.txt"
 FILTER_DATA_TEMP = "filter.txt"
-DEFAULT_HOST = 'http://localhost:5000/1'
+DEFAULT_HOST = 'http://localhost:9099/1'
 
 
 def read_data(*, filename):
@@ -49,7 +49,13 @@ def clean():
 
 if __name__ == "__main__":
     logging.info("Start sending data.")
-    host = sys.argv[1] if sys.argv[1] is not None else DEFAULT_HOST
+
+    try:
+        host = sys.argv[1]
+    except IndexError:
+        logging.debug("Working in local mode.")
+        host = DEFAULT_HOST
+
     send_data(datafile=DATA_FILE, host=host)
 
     logging.info("Creating vectors.")

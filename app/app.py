@@ -7,16 +7,25 @@ from flask import Flask, request
 
 from kalman import Kalman
 
-km = Kalman(54.47756757, 18.54963631)
+km = Kalman(lat=54.47756757, lon=18.54963631)
 app = Flask(__name__)
 
 
-@app.route('/1', methods=['POST'])
-def kalman():
+@app.route('/kalman/<track_id>', methods=['POST'])
+def kalman(track_id):
     data = json.loads(request.data.decode("utf-8"))
     lat = data["lat"]
     lon = data["lon"]
-    km.count_current_state(float(lat), float(lon))
+    km.count_current_state(lat=float(lat), lon=float(lon))
+    return "{} {} \n".format(str(km.x_tr[-1]), str(km.y_tr[-1]))
+
+
+@app.route('/1', methods=['POST'])
+def static_kalman():
+    data = json.loads(request.data.decode("utf-8"))
+    lat = data["lat"]
+    lon = data["lon"]
+    km.count_current_state(lat=float(lat), lon=float(lon))
     return "{} {} \n".format(str(km.x_tr[-1]), str(km.y_tr[-1]))
 
 
