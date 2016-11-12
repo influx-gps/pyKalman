@@ -31,20 +31,30 @@ def send_data(*, datafile):
     username, password, account_id = register()
     data = read_data(filename=datafile)
     track_id = init_transmission(data=next(data), account_id=account_id, username=username, password=password)
+    auth = HTTPBasicAuth(username, password)
+    locations = []
+    for message in send_loop(data, auth=auth, track_id=track_id):
+        locations = message['locations']
+    for location in locations:
+        latitude = location['latitude']
+        longitude = location['longitude']
+        with open(FILTER_DATA_TEMP, "a+") as file:
+            file.write('{} {}\n'.format(latitude, longitude))
+
+
+def send_loop(data, auth, track_id):
     for coordinates in data:
         payload = {
             "latitude": coordinates[0],
             "longitude": coordinates[1],
             "time": time.time()
         }
-        auth = HTTPBasicAuth(username, password)
         url = "{}/{}".format(TRACK_URL, track_id)
         response = requests.post(url=url,
                                  auth=auth,
                                  headers={'Content-Type': 'application/json'},
                                  data=json.dumps(payload))
-        with open(FILTER_DATA_TEMP, "a+") as file:
-            file.write(response.text)
+        yield json.loads(response.text)
 
 
 def init_transmission(*, data, account_id, username, password):
@@ -71,7 +81,7 @@ def init_transmission(*, data, account_id, username, password):
     latitude = data['locations'][0]['latitude']
     longitude = data['locations'][0]['longitude']
     with open(FILTER_DATA_TEMP, "a+") as file:
-        file.write('{} {}'.format(latitude, longitude))
+        file.write('{} {}\n'.format(latitude, longitude))
     return track_id
 
 
@@ -143,6 +153,9 @@ if __name__ == "__main__":
         y = np.squeeze(np.asarray(y))
 
         v, z = zip(*[(lat, lon) for lat, lon in read_data(filename=FILTER_DATA_TEMP)])
+        # removing starting zeros
+        v = v[2:]
+        z = z[2:]
         v = np.squeeze(np.asarray(v))
         z = np.squeeze(np.asarray(z))
 
