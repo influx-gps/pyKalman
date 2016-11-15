@@ -16,7 +16,7 @@ app = Flask(__name__)
 def kalman(track_id):
     data = json.loads(request.data.decode("utf-8"))
     corrected_lat, corrected_lon = SE.calculate(data=data, id=track_id)
-    return "{} {} \n".format(corrected_lat, corrected_lon)
+    return json.dumps({'latitude': corrected_lat, 'longitude': corrected_lon})
 
 
 @app.route('/')

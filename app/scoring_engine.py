@@ -38,7 +38,7 @@ class ScoringEngine(object):
 
     @staticmethod
     def unpack_request(request_data):
-        lat = request_data["lat"]
-        lon = request_data["lon"]
+        lat = request_data["latitude"]
+        lon = request_data["longitude"]
         position = request_data["position"]
         return lat, lon, position
