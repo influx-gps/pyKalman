@@ -57,19 +57,13 @@ def send_loop(data, auth, track_id):
         yield json.loads(response.text)
 
 
-def init_transmission(*, data, account_id, username, password):
+def init_transmission(*, data, username, password):
     init_lat, init_lon = data
     init_time = time.time()
-    locations = {
+    payload = {
         "latitude": init_lat,
         "longitude": init_lon,
         "time": init_time
-    }
-    payload = {
-        "accountId": account_id,
-        "locations": locations,
-        "startTime": init_time,
-        "distance": 0
     }
     auth = HTTPBasicAuth(username, password)
     response = requests.post(url=TRACK_URL,
