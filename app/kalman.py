@@ -12,7 +12,7 @@ class Kalman(object):
         self.G = G
         self.I = I
 
-    def estimate(self, *, lat, lon, P, state):
+    def estimate(self, lat, lon, P, state):
         new_state = self.F * state
         P = self.F * P * self.F.T + \
                  self.G * self.Q * self.G.T

@@ -1,5 +1,6 @@
 applications:
 - name: pyKalman
   memory: 1GB
+  buildpack: python_buildpack
   disk_quota: 2GB
   command: python app/app.py
